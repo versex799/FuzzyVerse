@@ -83,7 +83,7 @@
             <properties>
               <editable value="true"/>
               <font name="Consolas"/>
-              <text value="http://{}.hierthinking.com"/>
+              <text value=""/>
             </properties>
           </component>
           <component id="4f171" class="javax.swing.JButton" binding="runBtn">
@@ -128,6 +128,7 @@
                     </constraints>
                     <properties>
                       <font name="Consolas"/>
+                      <text value="1"/>
                     </properties>
                   </component>
                 </children>
@@ -246,6 +247,7 @@
                 </constraints>
                 <properties>
                   <margin top="5" left="20" bottom="5" right="20"/>
+                  <selected value="true"/>
                   <text value="GET"/>
                 </properties>
               </component>

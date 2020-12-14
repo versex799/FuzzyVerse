@@ -38,6 +38,7 @@ public class MainWindow extends JFrame {
     private List<FilterItem> _filters;
 
     private UrlFilter _urlFilter;
+    private Wordlist _wordlist;
 
     public MainWindow(String title)
     {
@@ -52,8 +53,13 @@ public class MainWindow extends JFrame {
         _urlFilter = new UrlFilter();
 
         SetupFiltersComboBox();
-        SetupTestingData();
+        //SetupTestingData();
+        SetupButtonClickEvents();
 
+    }
+
+    private void SetupButtonClickEvents()
+    {
         createFilterBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -86,12 +92,24 @@ public class MainWindow extends JFrame {
 
     public void ChooseWordlist()
     {
+
         JFileChooser chooser = new JFileChooser();
         var ret = chooser.showOpenDialog(this);
 
         if(ret == JFileChooser.APPROVE_OPTION)
         {
             wordlistTextBox.setText(chooser.getSelectedFile().getAbsoluteFile().getAbsolutePath());
+
+            _wordlist = new Wordlist(wordlistTextBox.getText());
+
+            try
+            {
+                _wordlist.Import();
+            }
+            catch (IOException ex)
+            {
+                JOptionPane.showMessageDialog(this, "Invalid file:\n" + ex);
+            }
         }
     }
 
@@ -136,14 +154,59 @@ public class MainWindow extends JFrame {
         Request request = new Request();
 
 
-        // Remember to switch out the replace with word from wordlist
-        request.GetRequest(urlTextBox.getText().replace("{}", ""));
+        if(wordlistTextBox.getText() == "")
+        {
+            JOptionPane.showMessageDialog(this, "No wordlist is selected. Please select a wordlist");
+            return;
+        }
+
+        while(_wordlist.HasNextLine()) {
+            boolean failed = false;
+
+            try {
+                UrlInfo urlinfo = request.GetRequestTesting(urlTextBox.getText().replace("{}", _wordlist.NextLine()));
+
+                if(urlinfo.ReturnCode != -1)
+                    _urls.add(urlinfo);
+            }
+            catch (IOException ex)
+            {
+                continue;
+
+            }
+
+            if(_urls.size() > 0) {
+                _displayUrls = _urlFilter.Execute(_urls, _filters);
+
+                UpdateUrlTableData(_displayUrls);
+            }
+        }
+
+
     }
 
     public static void main(String[] args)
     {
+        SetLookAndFeel();
+
         JFrame frame = new MainWindow("Fuzzy Verse");
         frame.setVisible(true);
+    }
+
+    private static void SetLookAndFeel()
+    {
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        }
+        catch (UnsupportedLookAndFeelException e) {
+            // handle exception
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private void SetupTestingData()
